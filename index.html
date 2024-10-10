@@ -21,8 +21,9 @@
   
   <script>
     const donutElement = document.getElementById('donut');
-    const screen_width = 80;
-    const screen_height = 22;
+    const screen_width = 60;  // Decrease width
+    const screen_height = 20;  // Decrease height
+
     
     let A = 0;
     let B = 0;
@@ -45,8 +46,8 @@
           const n = Math.sin(B);
           const t = c * h * g - f * e;
 
-          const x = Math.floor(screen_width / 2 + 30 * D * (l * h * m - t * n));
-          const y = Math.floor(screen_height / 2 + 15 * D * (l * h * n + t * m));
+          const x = Math.floor(screen_width / 2 + 20 * D * (l * h * m - t * n)); // Lowering from 30 to 20
+          const y = Math.floor(screen_height / 2 + 10 * D * (l * h * n + t * m)); // Lowering from 15 to 10
           const o = x + screen_width * y;
           const N = Math.floor(8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n));
 
