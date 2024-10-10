@@ -3,104 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>donut yay</title>
+  <title>3D Torus Rendering</title>
   <style>
     body {
       background-color: black;  /* Set the background to black */
-      color: white;             /* Set text color to white for visibility */
-      font-family: monospace;   /* Optional: use a monospaced font for code */
+      color: white;
+      text-align: center;
+      margin: 0;
     }
-    pre {
-      background-color: #1e1e1e; /* Darker background for the code block */
-      padding: 15px;
-      border-radius: 8px;       /* Slightly round the corners of the code block */
-      overflow: auto;           /* Ensure code can scroll if it's too long */
+    canvas {
+      display: block;
+      margin: auto;
+      background-color: black;  /* Black background for the canvas */
     }
   </style>
 </head>
 <body>
-    <h1>3D Torus Rotation Code</h1>
-  <pre><code>
-const float theta_spacing = 0.07;
-const float phi_spacing   = 0.02;
+  <h1>3D Torus Rotation</h1>
+  <canvas id="canvas" width="500" height="500"></canvas>
+  
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
 
-const float R1 = 1;
-const float R2 = 2;
-const float K2 = 5;
-// Calculate K1 based on screen size: the maximum x-distance occurs
-// roughly at the edge of the torus, which is at x=R1+R2, z=0.  we
-// want that to be displaced 3/8ths of the width of the screen, which
-// is 3/4th of the way from the center to the side of the screen.
-// screen_width*3/8 = K1*(R1+R2)/(K2+0)
-// screen_width*K2*3/(8*(R1+R2)) = K1
-const float K1 = screen_width*K2*3/(8*(R1+R2));
+    const R1 = 100;  // Radius of the torus tube
+    const R2 = 200;  // Radius of the torus ring
+    const K1 = 150;  // Projection scale
+    const K2 = 5;
 
-render_frame(float A, float B) {
-  // precompute sines and cosines of A and B
-  float cosA = cos(A), sinA = sin(A);
-  float cosB = cos(B), sinB = sin(B);
+    const thetaSpacing = 0.07;
+    const phiSpacing = 0.02;
 
-  char output[0..screen_width, 0..screen_height] = ' ';
-  float zbuffer[0..screen_width, 0..screen_height] = 0;
+    function renderTorus(A, B) {
+      ctx.clearRect(0, 0, width, height);  // Clear the canvas
+      const cosA = Math.cos(A), sinA = Math.sin(A);
+      const cosB = Math.cos(B), sinB = Math.sin(B);
 
-  // theta goes around the cross-sectional circle of a torus
-  for (float theta=0; theta < 2*pi; theta += theta_spacing) {
-    // precompute sines and cosines of theta
-    float costheta = cos(theta), sintheta = sin(theta);
+      for (let theta = 0; theta < 2 * Math.PI; theta += thetaSpacing) {
+        const cosTheta = Math.cos(theta), sinTheta = Math.sin(theta);
 
-    // phi goes around the center of revolution of a torus
-    for(float phi=0; phi < 2*pi; phi += phi_spacing) {
-      // precompute sines and cosines of phi
-      float cosphi = cos(phi), sinphi = sin(phi);
-    
-      // the x,y coordinate of the circle, before revolving (factored
-      // out of the above equations)
-      float circlex = R2 + R1*costheta;
-      float circley = R1*sintheta;
+        for (let phi = 0; phi < 2 * Math.PI; phi += phiSpacing) {
+          const cosPhi = Math.cos(phi), sinPhi = Math.sin(phi);
 
-      // final 3D (x,y,z) coordinate after rotations, directly from
-      // our math above
-      float x = circlex*(cosB*cosphi + sinA*sinB*sinphi)
-        - circley*cosA*sinB; 
-      float y = circlex*(sinB*cosphi - sinA*cosB*sinphi)
-        + circley*cosA*cosB;
-      float z = K2 + cosA*circlex*sinphi + circley*sinA;
-      float ooz = 1/z;  // "one over z"
-      
-      // x and y projection.  note that y is negated here, because y
-      // goes up in 3D space but down on 2D displays.
-      int xp = (int) (screen_width/2 + K1*ooz*x);
-      int yp = (int) (screen_height/2 - K1*ooz*y);
-      
-      // calculate luminance.  ugly, but correct.
-      float L = cosphi*costheta*sinB - cosA*costheta*sinphi -
-        sinA*sintheta + cosB*(cosA*sintheta - costheta*sinA*sinphi);
-      // L ranges from -sqrt(2) to +sqrt(2).  If it's < 0, the surface
-      // is pointing away from us, so we won't bother trying to plot it.
-      if (L > 0) {
-        // test against the z-buffer.  larger 1/z means the pixel is
-        // closer to the viewer than what's already plotted.
-        if(ooz > zbuffer[xp,yp]) {
-          zbuffer[xp, yp] = ooz;
-          int luminance_index = L*8;
-          // luminance_index is now in the range 0..11 (8*sqrt(2) = 11.3)
-          // now we lookup the character corresponding to the
-          // luminance and plot it in our output:
-          output[xp, yp] = ".,-~:;=!*#$@"[luminance_index];
+          const circleX = R2 + R1 * cosTheta;
+          const circleY = R1 * sinTheta;
+
+          const x = circleX * (cosB * cosPhi + sinA * sinB * sinPhi) - circleY * cosA * sinB;
+          const y = circleX * (sinB * cosPhi - sinA * cosB * sinPhi) + circleY * cosA * cosB;
+          const z = K2 + cosA * circleX * sinPhi + circleY * sinA;
+          const ooz = 1 / z;
+
+          const xp = (width / 2 + K1 * ooz * x);
+          const yp = (height / 2 - K1 * ooz * y);
+
+          ctx.fillStyle = 'white';
+          ctx.fillRect(xp, yp, 2, 2);  // Draw the pixel
         }
       }
     }
-  }
 
-  // now, dump output[] to the screen.
-  // bring cursor to "home" location, in just about any currently-used
-  // terminal emulation mode
-  printf("\x1b[H");
-  for (int j = 0; j < screen_height; j++) {
-    for (int i = 0; i < screen_width; i++) {
-      putchar(output[i,j]);
+    let A = 0, B = 0;
+    function animate() {
+      A += 0.04;  // Increment angle A
+      B += 0.03;  // Increment angle B
+      renderTorus(A, B);
+      requestAnimationFrame(animate);
     }
-    putchar('\n');
-  }
-  
-}
+
+    animate();  // Start the animation loop
+  </script>
+</body>
+</html>
