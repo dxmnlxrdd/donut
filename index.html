@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Torus Rendering</title>
+  <title>donut yay</title>
   <style>
     body {
-      background-color: black;  /* Set the background to black */
-      color: white;
-      text-align: center;
       margin: 0;
+      background-color: black;  /* Set the background to black */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;  /* Make the body take up the full viewport height */
+      overflow: hidden; /* Remove scrolling */
     }
     canvas {
-      display: block;
-      margin: auto;
       background-color: black;  /* Black background for the canvas */
     }
   </style>
 </head>
 <body>
-  <h1>3D Torus Rotation</h1>
   <canvas id="canvas" width="500" height="500"></canvas>
   
   <script>
